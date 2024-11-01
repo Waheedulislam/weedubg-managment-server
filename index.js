@@ -4,6 +4,13 @@ const mongoose = require("mongoose");
 const authRoutes = require("./routes/authRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const app = express();
+const cors = require("cors");
+
+app.use(
+  cors({
+    origin: "http://localhost:5173", // Allow requests from your frontend URL
+  })
+);
 
 // Middleware
 app.use(express.json());
