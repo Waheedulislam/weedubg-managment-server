@@ -7,7 +7,7 @@ const generateToken = (user) => {
     expiresIn: "7d",
   });
 };
-
+//
 // User Registration
 exports.register = async (req, res) => {
   const { name, email, password, role } = req.body;
