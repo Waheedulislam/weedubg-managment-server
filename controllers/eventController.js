@@ -3,6 +3,9 @@ const Event = require("../models/Event");
 // Create a new event
 exports.createEvent = async (req, res) => {
   const { title, description, date, location } = req.body;
+
+  console.log(req.body);
+
   try {
     const event = await Event.create({
       title,
@@ -12,6 +15,7 @@ exports.createEvent = async (req, res) => {
       organizer: req.user._id,
     });
     res.status(201).json(event);
+    console.log(event);
   } catch (error) {
     res.status(400).json({ error: error.message });
   }
@@ -72,19 +76,26 @@ exports.updateEvent = async (req, res) => {
 exports.deleteEvent = async (req, res) => {
   try {
     const event = await Event.findById(req.params.id);
-    if (!event) return res.status(404).json({ message: "Event not found" });
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
 
-    // Check if the user is the organizer
-    if (event.organizer.toString() !== req.user._id.toString()) {
+    // Check if the user is the organizer or has an admin role
+    if (
+      event.organizer.toString() !== req.user._id.toString() &&
+      req.user.role !== "admin"
+    ) {
       return res
         .status(403)
         .json({ message: "Unauthorized to delete this event" });
     }
 
-    await event.remove();
-    res.json({ message: "Event deleted successfully" });
+    // Delete the event
+    await Event.findByIdAndDelete(req.params.id);
+    res.status(200).json({ message: "Event deleted successfully" });
   } catch (error) {
-    res.status(500).json({ error: error.message });
+    console.error("Error deleting event:", error);
+    res.status(500).json({ message: "Internal Server Error" });
   }
 };
 
