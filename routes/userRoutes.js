@@ -15,10 +15,8 @@ router.get("/", auth, roleCheck(["admin", "organizer"]), getAllUsers);
 router.get("/profile", auth, getProfile);
 router.put("/profile", auth, updateProfile);
 
-// Admin-only route
-router.get("/admin/users", auth, roleCheck(["admin"]), getAllUsers);
-
-// Route to delete a user, admin only
-router.delete("/:id", auth, roleCheck(["admin"]), deleteUser);
+// Admin-only routes
+router.put("/role/:id", auth, roleCheck(["admin"]), updateRole); // Route to update role
+router.delete("/:id", auth, roleCheck(["admin"]), deleteUser); // Route to delete user
 
 module.exports = router;
