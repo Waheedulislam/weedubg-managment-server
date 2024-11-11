@@ -34,7 +34,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/bookings", bookingRoutes);
-app.use("/api/meet", meetingRoutes);
+app.use("/api", meetingRoutes);
 
 
 
