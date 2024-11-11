@@ -5,6 +5,9 @@ const authRoutes = require("./routes/authRoutes");
 const eventRoutes = require("./routes/eventRoutes");
 const userRoutes = require("./routes/userRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
+const meetingRoutes = require("./routes/meetingRoutes");
+// const meetRoutes = require("./routes/meetRoutes");
+
 const app = express();
 const cors = require("cors");
 
@@ -31,31 +34,8 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api/meet", meetingRoutes);
 
-app.post("/confirm-payment", async (req, res) => {
-  const { paymentId } = req.body; // Expecting paymentId in the body of the request
-
-  if (!paymentId) {
-    return res.status(400).json({ success: false, message: "Payment ID is required" });
-  }
-
-  // Mocking payment verification (replace with real SSLCommerz verification logic)
-  const isPaymentVerified = true; // Replace this with actual verification from SSLCommerz
-  if (isPaymentVerified) {
-    try {
-      console.log("Payment Verified");
-      // const authClient = await authenticate();
-      const meetLink =  'https://meet.google.com/wmh-tbcz-qho';
-      console.log(meetLink)
-      res.json({ meetLink });
-    } catch (error) {
-      console.error("Error creating Google Meet link", error);
-      res.status(500).json({ error: "Error creating Google Meet link" });
-    }
-  } else {
-    res.status(400).json({ success: false, message: "Payment verification failed" });
-  }
-});
 
 
 // Start server
