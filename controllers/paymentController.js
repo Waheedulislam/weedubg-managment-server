@@ -16,7 +16,8 @@ exports.createPayment = async (req, res) => {
         total_amount: paymentInfo.planPrice,
         currency: "BDT",
         tran_id: tran_id,
-        success_url: "http://localhost:5000/payment-success",
+        // success_url: "http://localhost:5000/payment-success",
+        success_url: "http://localhost:5173/about",
         fail_url: "http://localhost:5000/payment-fail",
         cancel_url: "http://localhost:5000/payment-cancel",
         cus_name: paymentInfo.customerName,
@@ -122,8 +123,7 @@ exports.paymentSuccess = async (req, res) => {
         // Check if the payment status update was successful
         if (result.modifiedCount === 1) {
             console.log("Payment status successfully updated.");
-            return res.redirect("http://localhost:5173/"); 
-            // return res.status(200).json({ message: "Payment success true" });
+            return res.redirect("http://localhost:5173/about"); // Redirect to the /about page after success
         } else {
             console.error("Payment status update failed.");
             return res.status(400).json({ message: "Payment update failed" });
