@@ -9,14 +9,14 @@ const handleError = (res, err, customMessage) => {
 exports.createMeeting = async (req, res) => {
   console.log("Starting meeting creation process..."); // Log process start
   try {
-    const { paymentId } = req.body;
-    console.log("Received payment ID:", paymentId); // Log received payment ID
+    // const { paymentId } = req.body;
+    // console.log("Received payment ID:", paymentId); // Log received payment ID
 
-    // Validate payment ID
-    if (!paymentId) {
-      console.warn("Payment ID is missing."); // Warn if payment ID is missing
-      return res.status(400).json({ success: false, message: "Payment ID is required" });
-    }
+    // // Validate payment ID
+    // if (!paymentId) {
+    //   console.warn("Payment ID is missing."); // Warn if payment ID is missing
+    //   return res.status(400).json({ success: false, message: "Payment ID is required" });
+    // }
 
     // Mocking payment verification (replace with real SSLCommerz verification logic)
     const isPaymentVerified = true; // Replace with actual verification

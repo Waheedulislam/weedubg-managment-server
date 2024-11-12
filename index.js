@@ -6,14 +6,15 @@ const eventRoutes = require("./routes/eventRoutes");
 const userRoutes = require("./routes/userRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const meetingRoutes = require("./routes/meetingRoutes");
-// const meetRoutes = require("./routes/meetRoutes");
+const paymentRoutes = require("./routes/paymentRoutes");
 
 const app = express();
 const cors = require("cors");
 
 app.use(
   cors({
-    origin: "https://weedingpro.netlify.app",
+    // origin: "https://weedingpro.netlify.app",
+    origin: "http://localhost:5173", // Allow requests from your frontend URL
   })
 );
 
@@ -35,6 +36,7 @@ app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/bookings", bookingRoutes);
 app.use("/api", meetingRoutes);
+app.use("/api",paymentRoutes );
 
 
 
