@@ -7,6 +7,7 @@ exports.createPayment = async (req, res) => {
 
     const paymentInfo = req.body;
 
+    // Generate a unique transaction ID
     const tran_id = uuidv4();
     const userEmail = paymentInfo.customerEmail;
 
@@ -16,8 +17,7 @@ exports.createPayment = async (req, res) => {
         total_amount: paymentInfo.planPrice,
         currency: "BDT",
         tran_id: tran_id,
-        // success_url: "http://localhost:5000/payment-success",
-        success_url: "http://localhost:5173/about",
+        success_url: "http://localhost:5000/payment-success",
         fail_url: "http://localhost:5000/payment-fail",
         cancel_url: "http://localhost:5000/payment-cancel",
         cus_name: paymentInfo.customerName,
@@ -35,6 +35,8 @@ exports.createPayment = async (req, res) => {
         multi_card_name: "mastercard,visacard,amexcard",
     };
 
+    console.log("Initiate Data:", initiateData);
+
     try {
         const response = await axios({
             method: "POST",
@@ -42,6 +44,9 @@ exports.createPayment = async (req, res) => {
             data: initiateData,
             headers: { "Content-Type": "application/x-www-form-urlencoded" },
         });
+
+        // Log full response from SSLCommerz for debugging
+        console.log("SSLCommerz Response:", response.data);
 
         const newPayment = {
             paymentType: response.data.card_brand || "N/A",
@@ -51,13 +56,12 @@ exports.createPayment = async (req, res) => {
             paymentId: tran_id,
             eventPlan: paymentInfo.eventPlan,
             planPrice: paymentInfo.planPrice,
-            status: "Pending",
+            status: "Pending", // Status is pending initially
             timestamp: new Date(),
         };
-        // console.log("New payment object to save:", newPayment);
 
+        // Check if the user exists in the database
         const existingUser = await Payment.findOne({ customerEmail: userEmail });
-        // console.log("Existing user check result:", existingUser);
 
         if (existingUser) {
             console.log("User exists. Updating payment information...");
@@ -65,25 +69,21 @@ exports.createPayment = async (req, res) => {
                 { customerEmail: userEmail },
                 { $push: { userPayment: newPayment } }
             );
-            // console.log("Update result:", updateResult);
 
             if (updateResult.matchedCount === 0 || updateResult.modifiedCount === 0) {
-                // console.error("Payment update failed for existing user.");
                 return res.status(500).send("Payment update failed");
             }
         } else {
-            // console.log("No existing user. Creating new user document...");
+            console.log("No existing user. Creating new user document...");
             const newUser = { customerEmail: userEmail, userPayment: [newPayment] };
             const insertResult = await Payment.create(newUser);
-            // console.log("Insert result for new user:", insertResult);
 
             if (!insertResult) {
-                // console.error("Failed to insert new user");
                 return res.status(500).send("Failed to insert new user");
             }
         }
 
-        // console.log("Payment process complete. Returning payment URL.");
+        // Send the Gateway URL for the user to complete the payment
         res.send({ paymentUrl: response.data.GatewayPageURL });
     } catch (error) {
         console.error("Error creating payment:", error);
@@ -91,39 +91,42 @@ exports.createPayment = async (req, res) => {
     }
 };
 
-// success payment api:
-
 exports.paymentSuccess = async (req, res) => {
     try {
         const successData = req.body;
-        // console.log("Success data from SSLCommerz:", successData);
+        console.log("Success data from SSLCommerz:", successData);
+        if (!successData.status || successData.status !== "VALID") {
+            console.error("অবৈধ পেমেন্ট স্ট্যাটাস:", successData.status);
+            return res.status(401).json({ message: "Unauthorized Payment, Invalid Payment" });
+        }
 
         // Check if the payment status is valid
-        if (successData.status !== "VALID") {
+        if (!successData.status || successData.status !== "VALID") {
+            console.error("Invalid payment status:", successData.status);
             return res.status(401).json({ message: "Unauthorized Payment, Invalid Payment" });
         }
 
         // Log transaction ID for verification
         const transactionId = successData.tran_id;
-        // console.log("Transaction ID:", transactionId);
+        console.log("Transaction ID:", transactionId);
 
         // Update the specific payment status in the database
         const query = { "userPayment.paymentId": transactionId };
         const update = {
             $set: {
                 "userPayment.$.status": "Success", // Update the specific payment status
-                "userPayment.$.paymentType": successData.card_brand,
-                "userPayment.$.paymentIssuer": successData.card_issuer,
+                "userPayment.$.paymentType": successData.card_brand || "N/A",
+                "userPayment.$.paymentIssuer": successData.card_issuer || "Unknown",
             },
         };
 
         const result = await Payment.updateOne(query, update);
-        // console.log("Database update result:", result);
+        console.log("Database update result:", result);
 
         // Check if the payment status update was successful
         if (result.modifiedCount === 1) {
             console.log("Payment status successfully updated.");
-            return res.redirect("http://localhost:5173/about"); // Redirect to the /about page after success
+            return res.redirect("http://localhost:5173/payment-success");  // Redirect after success
         } else {
             console.error("Payment status update failed.");
             return res.status(400).json({ message: "Payment update failed" });
