@@ -7,6 +7,7 @@ const userRoutes = require("./routes/userRoutes");
 const bookingRoutes = require("./routes/bookingRoutes");
 const meetingRoutes = require("./routes/meetingRoutes");
 const paymentRoutes = require("./routes/paymentRoutes");
+const reservationRoutes = require("./routes/reservationRoutes");
 
 const app = express();
 const cors = require("cors");
@@ -35,53 +36,55 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/events", eventRoutes);
 app.use("/api/bookings", bookingRoutes);
+app.use("/api", reservationRoutes);
 app.use("/api", meetingRoutes);
-app.use("/api",paymentRoutes );
+app.use("/api/payment-success", paymentRoutes);
 
 
-app.post('/payment-success',async(req,res)=>{
 
-  try {
-    const successData = req.body;
-    console.log("Success data from SSLCommerz:", successData);
+// app.post('/payment-success',async(req,res)=>{
 
-    // Check if the payment status is valid
-    if (successData.status !== "VALID") {
-        return res.status(401).json({ message: "Unauthorized Payment, Invalid Payment" });
-    }
+//   try {
+//     const successData = req.body;
+//     console.log("Success data from SSLCommerz:", successData);
 
-    // Log transaction ID for verification
-    const transactionId = successData.tran_id;
-    // console.log("Transaction ID:", transactionId);
+//     // Check if the payment status is valid
+//     if (successData.status !== "VALID") {
+//         return res.status(401).json({ message: "Unauthorized Payment, Invalid Payment" });
+//     }
 
-    // Update the specific payment status in the database
-    const query = { "userPayment.paymentId": transactionId };
-    const update = {
-        $set: {
-            "userPayment.$.status": "Success", // Update the specific payment status
-            "userPayment.$.paymentType": successData.card_brand,
-            "userPayment.$.paymentIssuer": successData.card_issuer,
-        },
-    };
+//     // Log transaction ID for verification
+//     const transactionId = successData.tran_id;
+//     // console.log("Transaction ID:", transactionId);
 
-    const result = await Payment.updateOne(query, update);
-    console.log("Database update result:", result);
+//     // Update the specific payment status in the database
+//     const query = { "userPayment.paymentId": transactionId };
+//     const update = {
+//         $set: {
+//             "userPayment.$.status": "Success", // Update the specific payment status
+//             "userPayment.$.paymentType": successData.card_brand,
+//             "userPayment.$.paymentIssuer": successData.card_issuer,
+//         },
+//     };
 
-    // Check if the payment status update was successful
-    if (result.modifiedCount === 1) {
-        console.log("Payment status successfully updated.");
-        return res.redirect("http://localhost:5173/payment-success");
-         // Redirect to the /about page after success
-    } else {
-        console.error("Payment status update failed.");
-        return res.status(400).json({ message: "Payment update failed" });
-    }
-} catch (error) {
-    console.error("Error updating payment status:", error);
-    return res.status(500).json({ message: "Internal server error" });
-}
+//     const result = await Payment.updateOne(query, update);
+//     console.log("Database update result:", result);
 
-})
+//     // Check if the payment status update was successful
+//     if (result.modifiedCount === 1) {
+//         console.log("Payment status successfully updated.");
+//         return res.redirect("http://localhost:5173/payment-success");
+//          // Redirect to the /about page after success
+//     } else {
+//         console.error("Payment status update failed.");
+//         return res.status(400).json({ message: "Payment update failed" });
+//     }
+// } catch (error) {
+//     console.error("Error updating payment status:", error);
+//     return res.status(500).json({ message: "Internal server error" });
+// }
+
+// })
 
 
 
