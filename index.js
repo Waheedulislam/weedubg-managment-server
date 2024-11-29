@@ -14,8 +14,8 @@ const cors = require("cors");
 
 app.use(
   cors({
-    // origin: "https://weedingpro.netlify.app",
-    origin: "http://localhost:5173", // Allow requests from your frontend URL
+    origin: "https://weedingpro.netlify.app",
+    // origin: "http://localhost:5173", // Allow requests from your frontend URL
   })
 );
 
